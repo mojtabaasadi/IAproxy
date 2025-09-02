@@ -37,7 +37,13 @@ app.post('/',async (req,res) => {
   const {data:requestData,url,method,headers:reqHeders} = req.body
   
   try {
-    const getRes = await axios[method](url,requestData,{headers:{...headers,...reqHeders}})
+    // const getRes = await axios[method](url,requestData,{headers:{...headers,...reqHeders}})
+    const getRes = await axios({
+      url,
+      method,
+      data:requestData,
+      headers:{...headers,...reqHeders}
+    })
     const {data,headers:resHeaders,status} = getRes
     
     res.set(resHeaders)
