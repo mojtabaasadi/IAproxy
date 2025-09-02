@@ -4,6 +4,7 @@ const axios = require('axios')
 const  { parse } = require( 'node-html-parser');
 const https = require('https');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const curlirize = require('axios-curlirize');
 
 const httpsAgent = new https.Agent({
   secureOptions: require('crypto').constants.SSL_OP_NO_SSLv3 | require('crypto').constants.SSL_OP_NO_TLSv1 | require('crypto').constants.SSL_OP_NO_TLSv1_1,  // Force TLSv1.2 and TLSv1.3 only
@@ -13,23 +14,26 @@ const httpsAgent = new https.Agent({
 const app = express();
 app.use(bodyParser.json())
 const headers = {
-  
-"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
-"Accept": "application/json, text/plain, */*",
-"Accept-Language": "en-US,en;q=0.5",
-"Accept-Encoding": "gzip, deflate, br, zstd",
-"Content-Type": "application/json",
-"Connection": "keep-alive",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
+  "Accept": "application/json, text/plain, */*",
+  "Accept-Language": "en-US,en;q=0.5",
+  "Accept-Encoding": "gzip, deflate, br, zstd",
+  "Content-Type": "application/json",
+  "Connection": "keep-alive",
 }
 
 
 
 
 app.post('/',async (req,res) => {
+  curlirize(axios, (result) => {
+    const { command } = result;
+    res.setHeader('X-Curlirize', command);
+  });
   const {data:requestData,url,method,headers:reqHeders} = req.body
   console.log({...headers,...reqHeders})
   try {
-    const getRes = await axios[method](url,requestData,{...headers,...reqHeders})
+    const getRes = await axios[method](url,requestData,{headers:{...headers,...reqHeders}})
     const {data,headers:resHeaders,status} = getRes
     
     res.set(resHeaders)
