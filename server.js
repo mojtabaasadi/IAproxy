@@ -4,7 +4,11 @@ const axios = require('axios')
 const  { parse } = require( 'node-html-parser');
 const https = require('https');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const curlirize = require('axios-curlirize');
+let curlirize = null;
+(async () => {
+  const { default:module } = await import("axios-curlirize");
+  curlirize = module;
+})();
 
 const httpsAgent = new https.Agent({
   secureOptions: require('crypto').constants.SSL_OP_NO_SSLv3 | require('crypto').constants.SSL_OP_NO_TLSv1 | require('crypto').constants.SSL_OP_NO_TLSv1_1,  // Force TLSv1.2 and TLSv1.3 only
@@ -31,7 +35,7 @@ app.post('/',async (req,res) => {
     res.setHeader('X-Curlirize', command);
   });
   const {data:requestData,url,method,headers:reqHeders} = req.body
-  console.log({...headers,...reqHeders})
+  
   try {
     const getRes = await axios[method](url,requestData,{headers:{...headers,...reqHeders}})
     const {data,headers:resHeaders,status} = getRes
